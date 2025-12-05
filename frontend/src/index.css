@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-gray-50 text-gray-900;
+}
+
+.answer-box {
+  @apply bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-gray-900;
+}
+
+.source-box {
+  @apply bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-gray-900 text-sm;
+}
+
+.web-result-box {
+  @apply bg-green-50 border-l-4 border-green-500 p-4 rounded text-gray-900;
+}
+
+.loading {
+  @apply animate-spin;
+}

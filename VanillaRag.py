@@ -15,7 +15,7 @@ load_dotenv()
 class VanillaRAG:
     """Simple RAG system using OpenAI embeddings and GPT"""
     
-    def __init__(self, docs_folder="docs", chunk_size=1000, chunk_overlap=200):
+    def __init__(self, docs_folder="docs", chunk_size=100, chunk_overlap=20):
         """
         Initialize the RAG system
         

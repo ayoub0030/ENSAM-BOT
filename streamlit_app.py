@@ -195,7 +195,7 @@ with col2:
         "What is this document about?",
         "Can you summarize the main topics?",
         "What are the key points?",
-        "Tell me about the content",
+        "Tell me about the content"
     ]
 
     for eq in example_questions:
