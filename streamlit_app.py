@@ -56,73 +56,22 @@ if 'chat_history' not in st.session_state:
 if 'use_web_search' not in st.session_state:
     st.session_state.use_web_search = False
 
+# Initialize RAG system and build index on first load
+if st.session_state.rag is None and not st.session_state.index_built:
+    try:
+        with st.spinner("Building RAG index... This may take a few minutes."):
+            st.session_state.rag = VanillaRAG(
+                docs_folder="docs",
+            )
+            st.session_state.rag.build_index()
+            st.session_state.index_built = True
+    except Exception as e:
+        st.session_state.index_built = False
+        st.error(f"❌ Error initializing RAG system: {str(e)}")
+
 # Header
 st.markdown('<h1 class="main-header">📚 ENSAM RAG System</h1>', unsafe_allow_html=True)
 st.markdown("### A simple Retrieval-Augmented Generation system using OpenAI")
-
-# Sidebar
-with st.sidebar:
-    st.header("⚙️ Configuration")
-    
-    # API Key input
-    api_key = st.text_input(
-        "OpenAI API Key",
-        type="password",
-        help="Enter your OpenAI API key"
-    )
-    
-    if api_key:
-        os.environ["OPENAI_API_KEY"] = api_key
-    
-    st.divider()
-    
-    # RAG Configuration
-    st.subheader("RAG Parameters")
-    chunk_size = st.slider("Chunk Size", 100, 200, 350, 50)
-    chunk_overlap = st.slider("Chunk Overlap", 0, 500, 200, 50)
-    
-    st.divider()
-    
-    # Web Search Toggle
-    st.subheader("Web Search")
-    st.session_state.use_web_search = st.checkbox("🌐 Enable Web Search", value=st.session_state.use_web_search, help="Augment answers with real-time web search results")
-    
-    # Build Index Button
-    if st.button("🔨 Build Index", type="primary", use_container_width=True):
-        if not api_key:
-            st.error("⚠️ Please enter your OpenAI API key first!")
-        else:
-            with st.spinner("Building RAG index... This may take a few minutes."):
-                try:
-                    # Initialize RAG system
-                    st.session_state.rag = VanillaRAG(
-                        docs_folder="docs",
-                        chunk_size=chunk_size,
-                        chunk_overlap=chunk_overlap
-                    )
-                    
-                    # Build the index
-                    st.session_state.rag.build_index()
-                    st.session_state.index_built = True
-                    
-                    st.success("✅ Index built successfully!")
-                    st.balloons()
-                    
-                except Exception as e:
-                    st.error(f"❌ Error building index: {str(e)}")
-                    st.session_state.index_built = False
-    
-    # Status indicator
-    st.divider()
-    if st.session_state.index_built:
-        st.success("✅ RAG System Ready")
-    else:
-        st.warning("⚠️ Index not built yet")
-    
-    # Clear chat button
-    if st.button("🗑️ Clear Chat History", use_container_width=True):
-        st.session_state.chat_history = []
-        st.rerun()
 
 # Main content area
 col1, col2 = st.columns([2, 1])
@@ -132,7 +81,7 @@ with col1:
     
     # Check if system is ready
     if not st.session_state.index_built:
-        st.info("👈 Please configure your API key and build the index using the sidebar.")
+        st.info("Initializing the RAG index. Please ensure your .env file contains a valid OPENAI_API_KEY.")
     else:
         # Question input
         question = st.text_input(
@@ -204,28 +153,51 @@ with col1:
 
 with col2:
     st.subheader("📊 System Info")
-    
+
+    # Status indicator
+    if st.session_state.index_built:
+        st.success("✅ RAG System Ready")
+    else:
+        st.warning("⚠️ Index not built yet")
+
+    st.divider()
+
+    # Web Search Toggle
+    st.subheader("Web Search")
+    st.session_state.use_web_search = st.checkbox(
+        "🌐 Enable Web Search",
+        value=st.session_state.use_web_search,
+        help="Augment answers with real-time web search results",
+    )
+
+    # Clear chat button
+    if st.button("🗑️ Clear Chat History", use_container_width=True):
+        st.session_state.chat_history = []
+        st.rerun()
+
+    st.divider()
+
     # Document info
     if os.path.exists("docs"):
         pdf_files = [f for f in os.listdir("docs") if f.endswith('.pdf')]
         st.metric("PDF Documents", len(pdf_files))
-        
+
         if pdf_files:
             st.write("**Files:**")
             for pdf in pdf_files:
                 st.write(f"📄 {pdf}")
-    
+
     st.divider()
-    
+
     # Example questions
     st.subheader("💡 Example Questions")
     example_questions = [
         "What is this document about?",
         "Can you summarize the main topics?",
         "What are the key points?",
-        "Tell me about the content"
+        "Tell me about the content",
     ]
-    
+
     for eq in example_questions:
         if st.button(eq, use_container_width=True, key=f"example_{eq}"):
             if st.session_state.index_built:
@@ -245,6 +217,4 @@ with col2:
                     except Exception as e:
                         st.error(f"❌ Error: {str(e)}")
             else:
-                st.warning("Please build the index first!")
-
-
+                st.warning("RAG system is not ready yet. Please check the initialization.")

@@ -280,18 +280,7 @@ def main():
         # Build the index
         rag.build_index()
         
-        # Example queries
-        test_questions = [
-            "What is this document about?",
-            "Can you summarize the main topics?"
-        ]
-        
-        for question in test_questions:
-            print(f"\nQuestion: {question}")
-            result = rag.query(question)
-            print(f"Answer: {result['answer']}")
-            print(f"Sources: {len(result['source_documents'])} documents")
-            
+      
     except Exception as e:
         print(f"Error: {str(e)}")
 
