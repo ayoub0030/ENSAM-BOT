@@ -78,7 +78,7 @@ class VanillaRAG:
         )
         
         chunks = text_splitter.split_documents(documents)
-        print(f"Split into {len(chunks)} chunks")
+        print(f"Split into {len(chunks)} chunks of size {chunk_size} with overlap {chunk_overlap}")
         return chunks
     
     def create_vectorstore(self, chunks):
@@ -88,10 +88,17 @@ class VanillaRAG:
         print("Vector store created successfully!")
         return self.vectorstore
     
-    def build_index(self):
+    def build_index(self, index_path="vectorstore"):
         """Build the complete RAG index from documents"""
         print("\n=== Building RAG Index ===")
-        
+
+        # If an index already exists on disk, load it instead of rebuilding
+        if os.path.exists(index_path):
+            print(f"Found existing vector store at '{index_path}', loading instead of rebuilding...")
+            self.load_vectorstore(index_path)
+            print("=== RAG Index Loaded ===\n")
+            return
+
         # Load documents
         documents = self.load_documents()
         
@@ -104,6 +111,9 @@ class VanillaRAG:
         # Create retriever
         self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
         
+        # Save to disk for future runs
+        self.save_vectorstore(index_path)
+
         print("=== RAG Index Ready ===\n")
     
     def query(self, question):
