@@ -16,9 +16,9 @@ export default function SettingsPanel({
   onClose,
 }) {
   return (
-    <div className="w-full md:w-80 border-l border-slate-700 bg-slate-800/50 backdrop-blur-sm overflow-y-auto flex flex-col">
+    <div className="w-full md:w-80 border-l border-slate-800 bg-slate-950/60 backdrop-blur-sm overflow-y-auto flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-4 border-b border-slate-800">
         <h2 className="text-lg font-semibold text-white">Settings</h2>
         <button
           onClick={onClose}
@@ -42,7 +42,7 @@ export default function SettingsPanel({
         {/* Status */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-slate-200">Status</h3>
-          <div className="flex items-center gap-2 p-3 bg-slate-700/50 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-slate-900/70 rounded-lg">
             <div className={`w-3 h-3 rounded-full ${indexBuilt ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
             <span className="text-sm text-slate-300">
               {indexBuilt ? '✅ Ready to chat' : '⚠️ Setup required'}
@@ -67,7 +67,7 @@ export default function SettingsPanel({
               value={chunkSize}
               onChange={(e) => setChunkSize(Number(e.target.value))}
               disabled={indexBuilt}
-              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500 disabled:opacity-50"
+              className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500 disabled:opacity-50"
             />
             <p className="text-xs text-slate-400 mt-1">Size of text chunks for processing</p>
           </div>
@@ -98,7 +98,7 @@ export default function SettingsPanel({
               type="checkbox"
               checked={useWebSearch}
               onChange={(e) => setUseWebSearch(e.target.checked)}
-              className="w-4 h-4 rounded accent-cyan-500 cursor-pointer"
+              className="w-4 h-4 rounded accent-sky-500 cursor-pointer"
             />
             <div>
               <p className="text-sm font-medium text-slate-200">Enable Web Search</p>
@@ -112,7 +112,7 @@ export default function SettingsPanel({
           <div className="space-y-2">
             <h3 className="text-sm font-semibold text-slate-200">Documents</h3>
             {docsInfo.folder_exists ? (
-              <div className="p-3 bg-slate-700/50 rounded-lg space-y-2">
+              <div className="p-3 bg-slate-900/70 rounded-lg space-y-2">
                 <p className="text-sm text-slate-300">
                   <span className="font-semibold text-cyan-400">{docsInfo.pdf_count}</span> PDF files
                 </p>
@@ -135,7 +135,7 @@ export default function SettingsPanel({
         {/* Setup Info */}
         <div className="space-y-2">
           <h3 className="text-sm font-semibold text-slate-200">Setup</h3>
-          <div className="p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg text-sm text-slate-300 space-y-1">
+          <div className="p-3 bg-sky-500/10 border border-sky-500/40 rounded-lg text-sm text-slate-300 space-y-1">
             <p className="font-semibold">Required:</p>
             <p className="text-xs">Make sure your <code className="bg-slate-700 px-1 rounded">.env</code> file contains:</p>
             <code className="block bg-slate-700 p-2 rounded text-xs text-cyan-400 mt-2">OPENAI_API_KEY=your_key</code>
@@ -144,7 +144,7 @@ export default function SettingsPanel({
       </div>
 
       {/* Action Buttons */}
-      <div className="px-4 py-4 border-t border-slate-700 space-y-2">
+      <div className="px-4 py-4 border-t border-slate-800 space-y-2">
         <button
           onClick={onBuildIndex}
           disabled={loading || indexBuilt}
@@ -153,7 +153,7 @@ export default function SettingsPanel({
               ? 'bg-green-500/20 text-green-400 cursor-not-allowed'
               : loading
               ? 'bg-slate-600 text-slate-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:from-blue-600 hover:to-cyan-600'
+              : 'bg-gradient-to-r from-sky-500 to-indigo-500 text-white hover:from-sky-400 hover:to-indigo-400'
           }`}
         >
           {loading ? '⏳ Building...' : indexBuilt ? '✅ Index Built' : '🔨 Build Index'}

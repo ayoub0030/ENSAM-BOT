@@ -43,7 +43,7 @@ export default function ChatArea({ indexBuilt, loading, chatHistory, onQuery, er
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center mx-auto">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center mx-auto">
                   <span className="text-2xl">✦</span>
                 </div>
                 <h2 className="text-xl font-semibold text-white">Start a Conversation</h2>
@@ -60,7 +60,7 @@ export default function ChatArea({ indexBuilt, loading, chatHistory, onQuery, er
                         key={q}
                         onClick={() => handleExampleQuestion(q)}
                         disabled={loading}
-                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-sm rounded-lg transition disabled:opacity-50"
+                        className="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-slate-200 text-sm rounded-lg transition disabled:opacity-50"
                       >
                         {q}
                       </button>
@@ -78,9 +78,9 @@ export default function ChatArea({ indexBuilt, loading, chatHistory, onQuery, er
             {loading && (
               <div className="flex justify-center py-4">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                  <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-2 h-2 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                 </div>
               </div>
             )}
@@ -98,7 +98,7 @@ export default function ChatArea({ indexBuilt, loading, chatHistory, onQuery, er
 
       {/* Input Area */}
       {indexBuilt && (
-        <div className="px-4 md:px-6 py-4 border-t border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+        <div className="px-4 md:px-6 py-4 border-t border-slate-800 bg-slate-950/60 backdrop-blur-sm">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <input
               type="text"
@@ -106,12 +106,12 @@ export default function ChatArea({ indexBuilt, loading, chatHistory, onQuery, er
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask me anything..."
               disabled={loading}
-              className="flex-1 px-4 py-3 bg-slate-700 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-500 disabled:opacity-50 transition"
+              className="flex-1 px-4 py-3 bg-slate-900 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 transition"
             />
             <button
               type="submit"
               disabled={loading || !question.trim()}
-              className="px-4 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-lg font-medium hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50 transition flex items-center gap-2"
+              className="px-4 py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white rounded-lg font-medium hover:from-sky-400 hover:to-indigo-400 disabled:opacity-50 transition flex items-center gap-2"
             >
               {loading ? (
                 <>

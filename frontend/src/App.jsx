@@ -88,11 +88,11 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 md:px-6 border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+      <header className="flex items-center justify-between px-4 py-3 md:px-6 border-b border-slate-800 bg-slate-950/60 backdrop-blur-sm">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-400 via-blue-500 to-indigo-500 flex items-center justify-center">
             <span className="text-white font-bold text-sm">✦</span>
           </div>
           <div>
