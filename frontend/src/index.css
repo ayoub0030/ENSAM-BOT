@@ -2,22 +2,44 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  @apply selection:bg-cyan-500/30 selection:text-cyan-100;
+}
+
 body {
-  @apply bg-gray-50 text-gray-900;
+  @apply bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-slate-100;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
-.answer-box {
-  @apply bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-gray-900;
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  @apply w-2;
 }
 
-.source-box {
-  @apply bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded text-gray-900 text-sm;
+::-webkit-scrollbar-track {
+  @apply bg-slate-800;
 }
 
-.web-result-box {
-  @apply bg-green-50 border-l-4 border-green-500 p-4 rounded text-gray-900;
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-600 rounded-full hover:bg-slate-500;
 }
 
-.loading {
-  @apply animate-spin;
+/* Input Range Styling */
+input[type='range'] {
+  @apply w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 cursor-pointer shadow-lg;
+}
+
+input[type='range']::-moz-range-thumb {
+  @apply w-4 h-4 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 cursor-pointer shadow-lg border-0;
+}
+
+/* Smooth Transitions */
+@layer components {
+  .transition-smooth {
+    @apply transition-all duration-300 ease-out;
+  }
 }

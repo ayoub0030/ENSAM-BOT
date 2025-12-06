@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { ragAPI } from './api'
-import Sidebar from './components/Sidebar'
 import ChatArea from './components/ChatArea'
-import SystemInfo from './components/SystemInfo'
+import SettingsPanel from './components/SettingsPanel'
 
 export default function App() {
   const [indexBuilt, setIndexBuilt] = useState(false)
@@ -13,12 +12,19 @@ export default function App() {
   const [chunkOverlap, setChunkOverlap] = useState(200)
   const [docsInfo, setDocsInfo] = useState(null)
   const [error, setError] = useState(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const messagesEndRef = useRef(null)
 
   // Check initial status
   useEffect(() => {
     checkStatus()
     fetchDocsInfo()
   }, [])
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatHistory])
 
   const checkStatus = async () => {
     try {
@@ -82,49 +88,66 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-3xl font-bold text-blue-600">📚 ENSAM RAG System</h1>
-          <p className="text-gray-600 mt-1">Retrieval-Augmented Generation with OpenAI</p>
+      <header className="flex items-center justify-between px-4 py-3 md:px-6 border-b border-slate-700 bg-slate-800/50 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">✦</span>
+          </div>
+          <div>
+            <h1 className="text-lg md:text-xl font-bold text-white">ENSAM</h1>
+            <p className="text-xs text-slate-400">RAG Assistant</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${indexBuilt ? 'bg-green-400' : 'bg-yellow-400'}`}></div>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className="p-2 hover:bg-slate-700 rounded-lg transition text-slate-300 hover:text-white"
+            title="Settings"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Sidebar
-              indexBuilt={indexBuilt}
-              loading={loading}
-              onBuildIndex={handleBuildIndex}
-              onClearHistory={handleClearHistory}
-              chunkSize={chunkSize}
-              setChunkSize={setChunkSize}
-              chunkOverlap={chunkOverlap}
-              setChunkOverlap={setChunkOverlap}
-              useWebSearch={useWebSearch}
-              setUseWebSearch={setUseWebSearch}
-              error={error}
-            />
-          </div>
-
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <ChatArea
-              indexBuilt={indexBuilt}
-              loading={loading}
-              chatHistory={chatHistory}
-              onQuery={handleQuery}
-            />
-          </div>
-
-          {/* System Info */}
-          <div className="lg:col-span-1">
-            <SystemInfo indexBuilt={indexBuilt} docsInfo={docsInfo} />
-          </div>
+      {/* Main Content */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Chat Area */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <ChatArea
+            indexBuilt={indexBuilt}
+            loading={loading}
+            chatHistory={chatHistory}
+            onQuery={handleQuery}
+            error={error}
+            messagesEndRef={messagesEndRef}
+          />
         </div>
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <SettingsPanel
+            indexBuilt={indexBuilt}
+            loading={loading}
+            onBuildIndex={handleBuildIndex}
+            onClearHistory={handleClearHistory}
+            chunkSize={chunkSize}
+            setChunkSize={setChunkSize}
+            chunkOverlap={chunkOverlap}
+            setChunkOverlap={setChunkOverlap}
+            useWebSearch={useWebSearch}
+            setUseWebSearch={setUseWebSearch}
+            error={error}
+            docsInfo={docsInfo}
+            onClose={() => setShowSettings(false)}
+          />
+        )}
       </div>
     </div>
   )
