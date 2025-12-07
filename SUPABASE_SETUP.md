@@ -73,10 +73,9 @@ CREATE INDEX idx_conversations_timestamp ON conversations(timestamp);
 ```sql
 CREATE TABLE user_info_ensam (
   id BIGSERIAL PRIMARY KEY,
-  school_id VARCHAR(255) UNIQUE NOT NULL REFERENCES users(school_id) ON DELETE CASCADE,
+  school_id VARCHAR(255) NOT NULL REFERENCES users(school_id) ON DELETE CASCADE,
   ensam_info TEXT NOT NULL,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- Create index for faster queries
@@ -111,10 +110,23 @@ CREATE INDEX idx_user_info_ensam_school_id ON user_info_ensam(school_id);
 | Column | Type | Description |
 |--------|------|-------------|
 | `id` | BIGSERIAL | Primary key |
-| `school_id` | VARCHAR(255) | Unique foreign key to users |
+| `school_id` | VARCHAR(255) | Foreign key to users (allows multiple entries per user) |
 | `ensam_info` | TEXT | User's ENSAM information/profile |
-| `created_at` | TIMESTAMP | When info was first created |
-| `updated_at` | TIMESTAMP | Last update time |
+| `created_at` | TIMESTAMP | When info was created |
+
+---
+
+## 4.5 Fix Existing Table (If Already Created)
+
+If you already created the `user_info_ensam` table with the UNIQUE constraint, run this to fix it:
+
+```sql
+-- Drop the unique constraint
+ALTER TABLE user_info_ensam DROP CONSTRAINT user_info_ensam_school_id_key;
+
+-- Remove the updated_at column if it exists
+ALTER TABLE user_info_ensam DROP COLUMN IF EXISTS updated_at;
+```
 
 ---
 
