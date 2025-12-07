@@ -10,21 +10,28 @@ const api = axios.create({
 })
 
 export const ragAPI = {
+  // Login with school ID
+  login: (schoolId) =>
+    api.post('/login', {
+      school_id: schoolId,
+    }),
+
   // Health check
   healthCheck: () => api.get('/health'),
 
   // Build index
-  buildIndex: (chunkSize = 150, chunkOverlap = 20) =>
+  buildIndex: (chunkSize = 1000, chunkOverlap = 200) =>
     api.post('/build-index', {
       chunk_size: chunkSize,
       chunk_overlap: chunkOverlap,
     }),
 
   // Query the RAG system
-  query: (question, useWebSearch = false) =>
+  query: (question, useWebSearch = false, schoolId = '') =>
     api.post('/query', {
       question,
       use_web_search: useWebSearch,
+      school_id: schoolId,
     }),
 
   // Get system status

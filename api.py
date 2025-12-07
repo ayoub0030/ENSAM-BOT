@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import os
 from dotenv import load_dotenv
 from VanillaRag import VanillaRAG
+from datetime import datetime
+from collections import defaultdict
 
 # Load environment variables
 load_dotenv()
@@ -27,10 +29,22 @@ app.add_middleware(
 # Global RAG instance
 rag_instance = None
 
+# In-memory user conversations storage
+# Format: { "school_id": [ { "role": "user|assistant", "content": "...", "timestamp": "..." }, ... ] }
+user_conversations = defaultdict(list)
+
 # Request/Response models
+class LoginRequest(BaseModel):
+    school_id: str
+
+class LoginResponse(BaseModel):
+    school_id: str
+    message: str
+
 class QueryRequest(BaseModel):
     question: str
     use_web_search: bool = False
+    school_id: str
 
 class BuildIndexRequest(BaseModel):
     chunk_size: int = 1000
@@ -58,6 +72,22 @@ class QueryResponse(BaseModel):
     web_results: list[dict] = []
 
 # Endpoints
+
+@app.post("/login", response_model=LoginResponse)
+def login(request: LoginRequest):
+    """Simple login with school ID"""
+    school_id = request.school_id.strip()
+    if not school_id:
+        raise HTTPException(status_code=400, detail="School ID cannot be empty")
+    
+    # Initialize conversation history for this user if not exists
+    if school_id not in user_conversations:
+        user_conversations[school_id] = []
+    
+    return LoginResponse(
+        school_id=school_id,
+        message=f"Welcome! You are logged in as {school_id}"
+    )
 
 @app.get("/health")
 def health_check():
@@ -91,7 +121,7 @@ def build_index(request: BuildIndexRequest):
 
 @app.post("/query")
 def query(request: QueryRequest) -> QueryResponse:
-    """Query the RAG system"""
+    """Query the RAG system with per-user memory"""
     global rag_instance
     
     if rag_instance is None or rag_instance.vectorstore is None:
@@ -100,26 +130,60 @@ def query(request: QueryRequest) -> QueryResponse:
             detail="RAG system not initialized. Please build the index first."
         )
     
+    school_id = request.school_id.strip()
+    if not school_id:
+        raise HTTPException(status_code=400, detail="School ID is required")
+    
     try:
+        # Load recent conversation history for this user (last 6 messages)
+        history = user_conversations.get(school_id, [])
+        history_text = ""
+        
+        if history:
+            # Get last 6 messages
+            recent_history = history[-6:]
+            for msg in recent_history:
+                role = "User" if msg["role"] == "user" else "Assistant"
+                history_text += f"{role}: {msg['content']}\n"
+            history_text += "\n---\n\n"
+        
+        # Enrich the question with conversation history
+        enriched_question = history_text + f"Current question: {request.question}"
+        
+        # Query RAG with enriched question
         if request.use_web_search:
             result = rag_instance.query_with_web_search(
-                request.question,
+                enriched_question,
                 use_web_search=True
             )
         else:
-            result = rag_instance.query(request.question)
+            result = rag_instance.query(enriched_question)
+        
+        answer = result["answer"]
         
         # Format source documents
         sources = [
             {
-                "content": doc.page_content[:1000],  # Limit to 500 chars
+                "content": doc.page_content[:1000],
                 "page": doc.metadata.get("page", 0) if hasattr(doc, "metadata") else 0
             }
             for doc in result["source_documents"]
         ]
         
+        # Store user question and assistant answer in conversation history
+        user_conversations[school_id].append({
+            "role": "user",
+            "content": request.question,
+            "timestamp": datetime.now().isoformat()
+        })
+        user_conversations[school_id].append({
+            "role": "assistant",
+            "content": answer,
+            "timestamp": datetime.now().isoformat()
+        })
+        
         return QueryResponse(
-            answer=result["answer"],
+            answer=answer,
             sources=sources,
             web_results=result.get("web_results", [])
         )
