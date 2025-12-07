@@ -6,20 +6,26 @@ from dotenv import load_dotenv
 from VanillaRag import VanillaRAG
 from datetime import datetime
 from collections import defaultdict
-from supabase import create_client, Client
 
 # Load environment variables
 load_dotenv()
 
-# Initialize Supabase client
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-if not SUPABASE_URL or not SUPABASE_KEY:
-    print("[WARNING] Supabase credentials not found. Database features will be disabled.")
-    supabase_client: Client = None
-else:
-    supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+# Initialize Supabase client (optional)
+supabase_client = None
+try:
+    from supabase import create_client, Client
+    
+    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+    
+    if SUPABASE_URL and SUPABASE_KEY:
+        supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+        print("[INFO] Supabase connected successfully")
+    else:
+        print("[WARNING] Supabase credentials not found. Database features will be disabled.")
+except ImportError:
+    print("[WARNING] Supabase package not installed. Database features will be disabled.")
+    print("[INFO] To enable Supabase: pip install supabase")
 
 # Initialize FastAPI app
 app = FastAPI(
