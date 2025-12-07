@@ -52,6 +52,7 @@ export default function SettingsPanel({
     try {
       await ragAPI.saveUserInfo(schoolId, ensam_info)
       setSaveSuccess(true)
+      setEnsam_info('') // Clear the textarea after save
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
       setInfoError(err.response?.data?.detail || 'Failed to save information')
@@ -164,6 +165,14 @@ export default function SettingsPanel({
           {saveSuccess && (
             <div className="p-2 bg-green-500/10 border border-green-500/30 rounded text-green-400 text-xs">
               ✅ Information saved successfully
+            </div>
+          )}
+
+          {/* Display Saved Information */}
+          {ensam_info && (
+            <div className="p-3 bg-slate-900/50 border border-sky-500/30 rounded-lg">
+              <p className="text-xs text-slate-400 mb-2">📌 Your saved information:</p>
+              <p className="text-sm text-slate-200 whitespace-pre-wrap break-words">{ensam_info}</p>
             </div>
           )}
 
