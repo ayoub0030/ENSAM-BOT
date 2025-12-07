@@ -40,7 +40,7 @@ export default function Login({ onLoginSuccess }) {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label className="block text-sm font-medium text-slate-200">
               School ID
@@ -54,41 +54,9 @@ export default function Login({ onLoginSuccess }) {
               className="w-full px-4 py-3 bg-slate-900 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 transition"
             />
             <p className="text-xs text-slate-400">
-              Your unique school identifier
+              Your unique school identifier to access the system
             </p>
           </div>
-
-          {isSignUp && (
-            <>
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-200">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  disabled={loading}
-                  className="w-full px-4 py-3 bg-slate-900 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 transition"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-slate-200">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a password"
-                  disabled={loading}
-                  className="w-full px-4 py-3 bg-slate-900 text-white placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:opacity-50 transition"
-                />
-              </div>
-            </>
-          )}
 
           {error && (
             <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
@@ -98,35 +66,19 @@ export default function Login({ onLoginSuccess }) {
 
           <button
             type="submit"
-            disabled={loading || !schoolId.trim() || (isSignUp && (!email.trim() || !password.trim()))}
+            disabled={loading || !schoolId.trim()}
             className="w-full py-3 bg-gradient-to-r from-sky-500 to-indigo-500 text-white rounded-lg font-semibold hover:from-sky-400 hover:to-indigo-400 disabled:opacity-50 transition flex items-center justify-center gap-2"
           >
             {loading ? (
               <>
                 <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>{isSignUp ? 'Creating account...' : 'Logging in...'}</span>
+                <span>Logging in...</span>
               </>
             ) : (
-              <span>{isSignUp ? 'Sign Up' : 'Login'}</span>
+              <span>Login</span>
             )}
           </button>
         </form>
-
-        {/* Toggle Sign Up / Login */}
-        <div className="text-center text-sm">
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignUp(!isSignUp)
-              setError(null)
-              setEmail('')
-              setPassword('')
-            }}
-            className="text-sky-400 hover:text-sky-300 transition"
-          >
-            {isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up"}
-          </button>
-        </div>
 
         {/* Footer */}
         <div className="text-center text-xs text-slate-500">

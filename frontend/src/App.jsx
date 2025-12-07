@@ -19,11 +19,10 @@ export default function App() {
 
   // Check if user is already logged in
   useEffect(() => {
-    const token = localStorage.getItem('access_token')
     const userId = localStorage.getItem('user_id')
     const schoolId = localStorage.getItem('school_id')
     
-    if (token && userId && schoolId) {
+    if (userId && schoolId) {
       setUser({ user_id: userId, school_id: schoolId })
     }
   }, [])
@@ -109,7 +108,6 @@ export default function App() {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem('access_token')
     localStorage.removeItem('user_id')
     localStorage.removeItem('school_id')
     setUser(null)
