@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { ragAPI } from '../api'
 
 export default function Login({ onLoginSuccess }) {
   const [schoolId, setSchoolId] = useState('')
@@ -17,12 +16,23 @@ export default function Login({ onLoginSuccess }) {
     setError(null)
 
     try {
-      const response = await ragAPI.login(schoolId.trim())
-      const data = response.data
+      const response = await fetch('http://localhost:8000/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ school_id: schoolId.trim() }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Login failed')
+      }
+
+      const data = await response.json()
       localStorage.setItem('school_id', data.school_id)
       onLoginSuccess(data.school_id)
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Failed to login')
+      setError(err.message || 'Failed to login')
     } finally {
       setLoading(false)
     }
