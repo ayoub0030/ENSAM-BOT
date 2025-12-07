@@ -62,7 +62,7 @@ class GeminiAPIManager:
 class VanillaRAG:
     """Simple RAG system using OpenAI embeddings and GPT"""
 
-    def __init__(self, docs_folder="docs", chunk_size=100, chunk_overlap=20):
+    def __init__(self, docs_folder="docs", chunk_size=1000, chunk_overlap=200):
         """
         Initialize the RAG system
 
@@ -161,7 +161,7 @@ class VanillaRAG:
         self.create_vectorstore(chunks)
 
         # Create retriever
-        self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 3})
+        self.retriever = self.vectorstore.as_retriever(search_kwargs={"k": 5})
 
         # Save to disk for future runs
         self.save_vectorstore(index_path)
@@ -185,14 +185,14 @@ class VanillaRAG:
         if self.retriever is not None:
             docs = self.retriever.invoke(question)
         else:
-            docs = self.vectorstore.similarity_search(question, k=3)
+            docs = self.vectorstore.similarity_search(question, k=5)
 
         # Build context string from retrieved documents
         context = "\n\n---\n\n".join(doc.page_content for doc in docs)
 
         prompt = (
             "Use the following pieces of context to answer the question at the end. "
-            "If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n"
+            "the tone should be freindly and If you don't know the answer, just say that you don't know, don't try to make up an answer.\n\n"
             f"Context:\n{context}\n\nQuestion: {question}\n\nAnswer:"
         )
 
@@ -455,7 +455,7 @@ if __name__ == "__main__":
 #class VanillaRAG:
     """Simple RAG system using OpenAI embeddings and GPT"""
     
-    def __init__(self, docs_folder="docs", chunk_size=100, chunk_overlap=20):
+    def __init__(self, docs_folder="docs", chunk_size=1000, chunk_overlap=200):
         """
         Initialize the RAG system
         

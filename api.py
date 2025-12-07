@@ -33,8 +33,20 @@ class QueryRequest(BaseModel):
     use_web_search: bool = False
 
 class BuildIndexRequest(BaseModel):
-    chunk_size: int = 100
-    chunk_overlap: int = 20
+    chunk_size: int = 1000
+    chunk_overlap: int = 200
+
+def initialize_rag(chunk_size: int = 1000, chunk_overlap: int = 200):
+    global rag_instance
+    api_key = os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError("OPENAI_API_KEY not set in environment variables")
+    rag_instance = VanillaRAG(
+        docs_folder="docs",
+        chunk_size=chunk_size,
+        chunk_overlap=chunk_overlap,
+    )
+    rag_instance.build_index()
 
 class SourceDocument(BaseModel):
     content: str
@@ -58,26 +70,11 @@ def health_check():
 @app.post("/build-index")
 def build_index(request: BuildIndexRequest):
     """Build the RAG index from documents in the docs folder"""
-    global rag_instance
-    
     try:
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise HTTPException(
-                status_code=400,
-                detail="OPENAI_API_KEY not set in environment variables"
-            )
-        
-        # Initialize RAG system
-        rag_instance = VanillaRAG(
-            docs_folder="docs",
+        initialize_rag(
             chunk_size=request.chunk_size,
-            chunk_overlap=request.chunk_overlap
+            chunk_overlap=request.chunk_overlap,
         )
-        
-        # Build the index
-        rag_instance.build_index()
-        
         return {
             "status": "success",
             "message": "Index built successfully",
@@ -87,6 +84,8 @@ def build_index(request: BuildIndexRequest):
     
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -165,6 +164,13 @@ def get_docs_info():
         "pdf_count": len(pdf_files),
         "files": pdf_files
     }
+
+@app.on_event("startup")
+def startup_event():
+    try:
+        initialize_rag()
+    except Exception as e:
+        print(f"Failed to initialize RAG index on startup: {e}")
 
 if __name__ == "__main__":
     import uvicorn
