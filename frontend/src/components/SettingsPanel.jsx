@@ -18,9 +18,11 @@ export default function SettingsPanel({
   schoolId,
 }) {
   const [ensam_info, setEnsam_info] = useState('')
+  const [infoList, setInfoList] = useState([])
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [infoError, setInfoError] = useState(null)
+  const [deleting, setDeleting] = useState(null)
 
   // Load user info on mount
   useEffect(() => {
@@ -32,10 +34,11 @@ export default function SettingsPanel({
   const loadUserInfo = async () => {
     try {
       const response = await ragAPI.getUserInfo(schoolId)
-      setEnsam_info(response.data.ensam_info)
+      setInfoList(response.data.info_list || [])
     } catch (err) {
       // User info doesn't exist yet, that's fine
       console.log('No existing user info')
+      setInfoList([])
     }
   }
 
@@ -50,14 +53,27 @@ export default function SettingsPanel({
     setSaveSuccess(false)
 
     try {
-      await ragAPI.saveUserInfo(schoolId, ensam_info)
+      await ragAPI.addUserInfo(schoolId, ensam_info)
       setSaveSuccess(true)
       setEnsam_info('') // Clear the textarea after save
+      await loadUserInfo() // Reload the list
       setTimeout(() => setSaveSuccess(false), 3000)
     } catch (err) {
       setInfoError(err.response?.data?.detail || 'Failed to save information')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleDeleteInfo = async (infoId) => {
+    setDeleting(infoId)
+    try {
+      await ragAPI.deleteUserInfo(infoId)
+      await loadUserInfo() // Reload the list
+    } catch (err) {
+      setInfoError(err.response?.data?.detail || 'Failed to delete information')
+    } finally {
+      setDeleting(null)
     }
   }
   return (
@@ -81,10 +97,32 @@ export default function SettingsPanel({
         <div className="space-y-3 mb-6">
           <h3 className="text-sm font-semibold text-slate-200">📌 Your Saved Information</h3>
           
-          {ensam_info ? (
-            <div className="p-3 bg-slate-900/70 border border-sky-500/40 rounded-lg">
-              <p className="text-sm text-slate-200 whitespace-pre-wrap break-words">{ensam_info}</p>
-              <p className="text-xs text-slate-400 mt-2">Last updated: Just now</p>
+          {infoList.length > 0 ? (
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {infoList.map((item) => (
+                <div key={item.id} className="p-3 bg-slate-900/70 border border-sky-500/40 rounded-lg group hover:border-sky-500/60 transition">
+                  <div className="flex justify-between items-start gap-2">
+                    <p className="text-sm text-slate-200 whitespace-pre-wrap break-words flex-1">{item.ensam_info}</p>
+                    <button
+                      onClick={() => handleDeleteInfo(item.id)}
+                      disabled={deleting === item.id}
+                      className="flex-shrink-0 p-1 text-slate-400 hover:text-red-400 transition opacity-0 group-hover:opacity-100"
+                      title="Delete this entry"
+                    >
+                      {deleting === item.id ? (
+                        <span className="text-xs">⏳</span>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-400 mt-2">
+                    {new Date(item.created_at).toLocaleDateString()} {new Date(item.created_at).toLocaleTimeString()}
+                  </p>
+                </div>
+              ))}
             </div>
           ) : (
             <div className="p-3 bg-slate-900/50 border border-slate-700 rounded-lg text-center">

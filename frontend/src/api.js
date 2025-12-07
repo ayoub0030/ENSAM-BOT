@@ -40,16 +40,20 @@ export const ragAPI = {
   // Get documents info
   getDocsInfo: () => api.get('/docs-info'),
 
-  // Save user ENSAM info
-  saveUserInfo: (schoolId, ensam_info) =>
+  // Add new user ENSAM info entry
+  addUserInfo: (schoolId, ensam_info) =>
     api.post('/user-info', {
       school_id: schoolId,
       ensam_info: ensam_info,
     }),
 
-  // Get user ENSAM info
+  // Get all user ENSAM info entries
   getUserInfo: (schoolId) =>
     api.get(`/user-info/${schoolId}`),
+
+  // Delete a specific ENSAM info entry
+  deleteUserInfo: (infoId) =>
+    api.delete(`/user-info/${infoId}`),
 }
 
 export default api
