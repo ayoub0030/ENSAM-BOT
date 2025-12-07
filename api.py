@@ -57,6 +57,15 @@ class QueryRequest(BaseModel):
     use_web_search: bool = False
     school_id: str
 
+class UserInfoRequest(BaseModel):
+    school_id: str
+    ensam_info: str
+
+class UserInfoResponse(BaseModel):
+    school_id: str
+    ensam_info: str
+    updated_at: str
+
 class BuildIndexRequest(BaseModel):
     chunk_size: int = 1000
     chunk_overlap: int = 200
@@ -248,6 +257,74 @@ def query(request: QueryRequest) -> QueryResponse:
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/user-info", response_model=UserInfoResponse)
+def save_user_info(request: UserInfoRequest):
+    """Save or update user's ENSAM info"""
+    school_id = request.school_id.strip()
+    if not school_id:
+        raise HTTPException(status_code=400, detail="School ID is required")
+    
+    if not request.ensam_info:
+        raise HTTPException(status_code=400, detail="ENSAM info cannot be empty")
+    
+    # Save to Supabase if available
+    if supabase_client:
+        try:
+            # Check if user info already exists
+            existing_info = supabase_client.table("user_info_ensam").select("*").eq("school_id", school_id).execute()
+            
+            if existing_info.data:
+                # Update existing info
+                supabase_client.table("user_info_ensam").update({
+                    "ensam_info": request.ensam_info,
+                    "updated_at": datetime.now().isoformat()
+                }).eq("school_id", school_id).execute()
+            else:
+                # Create new info
+                supabase_client.table("user_info_ensam").insert({
+                    "school_id": school_id,
+                    "ensam_info": request.ensam_info,
+                    "created_at": datetime.now().isoformat(),
+                    "updated_at": datetime.now().isoformat()
+                }).execute()
+        except Exception as e:
+            print(f"[ERROR] Failed to save user info to Supabase: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Failed to save user info: {str(e)}")
+    else:
+        raise HTTPException(status_code=500, detail="Database not available")
+    
+    return UserInfoResponse(
+        school_id=school_id,
+        ensam_info=request.ensam_info,
+        updated_at=datetime.now().isoformat()
+    )
+
+@app.get("/user-info/{school_id}", response_model=UserInfoResponse)
+def get_user_info(school_id: str):
+    """Get user's ENSAM info"""
+    school_id = school_id.strip()
+    if not school_id:
+        raise HTTPException(status_code=400, detail="School ID is required")
+    
+    if not supabase_client:
+        raise HTTPException(status_code=500, detail="Database not available")
+    
+    try:
+        result = supabase_client.table("user_info_ensam").select("*").eq("school_id", school_id).execute()
+        
+        if not result.data:
+            raise HTTPException(status_code=404, detail="User info not found")
+        
+        user_info = result.data[0]
+        return UserInfoResponse(
+            school_id=user_info["school_id"],
+            ensam_info=user_info["ensam_info"],
+            updated_at=user_info["updated_at"]
+        )
+    except Exception as e:
+        print(f"[ERROR] Failed to retrieve user info from Supabase: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve user info: {str(e)}")
 
 @app.get("/status")
 def get_status():

@@ -173,6 +173,7 @@ export default function App() {
             error={error}
             docsInfo={docsInfo}
             onClose={() => setShowSettings(false)}
+            schoolId={schoolId}
           />
         )}
       </div>

@@ -39,6 +39,17 @@ export const ragAPI = {
 
   // Get documents info
   getDocsInfo: () => api.get('/docs-info'),
+
+  // Save user ENSAM info
+  saveUserInfo: (schoolId, ensam_info) =>
+    api.post('/user-info', {
+      school_id: schoolId,
+      ensam_info: ensam_info,
+    }),
+
+  // Get user ENSAM info
+  getUserInfo: (schoolId) =>
+    api.get(`/user-info/${schoolId}`),
 }
 
 export default api

@@ -69,6 +69,20 @@ CREATE INDEX idx_conversations_school_id ON conversations(school_id);
 CREATE INDEX idx_conversations_timestamp ON conversations(timestamp);
 ```
 
+### Table 3: User Info ENSAM
+```sql
+CREATE TABLE user_info_ensam (
+  id BIGSERIAL PRIMARY KEY,
+  school_id VARCHAR(255) UNIQUE NOT NULL REFERENCES users(school_id) ON DELETE CASCADE,
+  ensam_info TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Create index for faster queries
+CREATE INDEX idx_user_info_ensam_school_id ON user_info_ensam(school_id);
+```
+
 ---
 
 ## 4. Database Schema
@@ -92,6 +106,15 @@ CREATE INDEX idx_conversations_timestamp ON conversations(timestamp);
 | `answer` | TEXT | Assistant's answer (NULL for user messages) |
 | `timestamp` | TIMESTAMP | When message was created |
 | `created_at` | TIMESTAMP | Database record creation time |
+
+### `user_info_ensam` Table
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | BIGSERIAL | Primary key |
+| `school_id` | VARCHAR(255) | Unique foreign key to users |
+| `ensam_info` | TEXT | User's ENSAM information/profile |
+| `created_at` | TIMESTAMP | When info was first created |
+| `updated_at` | TIMESTAMP | Last update time |
 
 ---
 
