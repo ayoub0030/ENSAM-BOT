@@ -6,9 +6,20 @@ from dotenv import load_dotenv
 from VanillaRag import VanillaRAG
 from datetime import datetime
 from collections import defaultdict
+from supabase import create_client, Client
 
 # Load environment variables
 load_dotenv()
+
+# Initialize Supabase client
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    print("[WARNING] Supabase credentials not found. Database features will be disabled.")
+    supabase_client: Client = None
+else:
+    supabase_client: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -83,6 +94,27 @@ def login(request: LoginRequest):
     # Initialize conversation history for this user if not exists
     if school_id not in user_conversations:
         user_conversations[school_id] = []
+    
+    # Save user to Supabase if available
+    if supabase_client:
+        try:
+            # Check if user already exists
+            existing_user = supabase_client.table("users").select("*").eq("school_id", school_id).execute()
+            
+            if not existing_user.data:
+                # Create new user
+                supabase_client.table("users").insert({
+                    "school_id": school_id,
+                    "created_at": datetime.now().isoformat(),
+                    "last_login": datetime.now().isoformat()
+                }).execute()
+            else:
+                # Update last login
+                supabase_client.table("users").update({
+                    "last_login": datetime.now().isoformat()
+                }).eq("school_id", school_id).execute()
+        except Exception as e:
+            print(f"[ERROR] Failed to save user to Supabase: {str(e)}")
     
     return LoginResponse(
         school_id=school_id,
@@ -171,16 +203,42 @@ def query(request: QueryRequest) -> QueryResponse:
         ]
         
         # Store user question and assistant answer in conversation history
-        user_conversations[school_id].append({
+        user_msg = {
             "role": "user",
             "content": request.question,
             "timestamp": datetime.now().isoformat()
-        })
-        user_conversations[school_id].append({
+        }
+        assistant_msg = {
             "role": "assistant",
             "content": answer,
             "timestamp": datetime.now().isoformat()
-        })
+        }
+        
+        user_conversations[school_id].append(user_msg)
+        user_conversations[school_id].append(assistant_msg)
+        
+        # Save conversation to Supabase if available
+        if supabase_client:
+            try:
+                # Save user message
+                supabase_client.table("conversations").insert({
+                    "school_id": school_id,
+                    "role": "user",
+                    "question": request.question,
+                    "answer": None,
+                    "timestamp": user_msg["timestamp"]
+                }).execute()
+                
+                # Save assistant message
+                supabase_client.table("conversations").insert({
+                    "school_id": school_id,
+                    "role": "assistant",
+                    "question": request.question,
+                    "answer": answer,
+                    "timestamp": assistant_msg["timestamp"]
+                }).execute()
+            except Exception as e:
+                print(f"[ERROR] Failed to save conversation to Supabase: {str(e)}")
         
         return QueryResponse(
             answer=answer,

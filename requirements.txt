@@ -16,3 +16,4 @@ ddgs
 fastapi
 uvicorn
 pydantic
+supabase
